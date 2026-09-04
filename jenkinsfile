@@ -16,7 +16,7 @@ pipeline{
     steps {
         withCredentials([
             string(credentialsId: 'db_username', variable: 'DB_USERNAME'),
-            string(credentialsId: 'db_password', variable: 'DB_PASSWORD'),
+            string(credentialsId: 'password', variable: 'DB_PASSWORD'),
             string(credentialsId: 'root_password', variable: 'ROOT_PASSWORD')
         ]) {
             bat '''
@@ -45,7 +45,7 @@ pipeline{
 				steps{
 					withCredentials([
 						string(credentialsId:'db_username',variable:'DB_USERNAME'),
-						string(credentialsId:'db_password',variable:'DB_PASSWORD'),
+						string(credentialsId:'password',variable:'DB_PASSWORD'),
 						string(credentialsId:'root_password',variable:'ROOT_PASSWORD')
 					]){
 						
