@@ -7,8 +7,8 @@ services:
 
     environment:
       DB_URL: jdbc:mysql://mysql:3306/world
-      DB_USERNAME: appuser
-      DB_PASSWORD: apppassword
+      DB_USERNAME: ${db_username}
+      DB_PASSWORD: ${db_password}
 
     depends_on:
       mysql:
@@ -18,10 +18,10 @@ services:
     image: mysql:8.0
 
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: $(root_password)
       MYSQL_DATABASE: world
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: apppassword
+      MYSQL_USER: ${db_username}
+      MYSQL_PASSWORD: ${db_password}
 
     ports:
       - "3307:3306"
