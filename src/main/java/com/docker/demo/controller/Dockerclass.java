@@ -21,6 +21,7 @@ public class Dockerclass {
 		 Student s=new Student();
 		 //s.setId(1);
 		 s.setName("sai");
+		 l.add(s);
 		 Student s1=new Student();
 		// s1.setId(2);
 		 s1.setName("ram");
