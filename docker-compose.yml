@@ -1,0 +1,39 @@
+services:
+
+  app:
+    build: .
+    ports:
+      - "8082:8082"
+
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/world
+      DB_USERNAME: appuser
+      DB_PASSWORD: apppassword
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: world
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:
