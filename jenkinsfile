@@ -1,5 +1,5 @@
 pipeline{
-	agent any{
+	agent any
 		stages
 		{
 			stage('checkout'){
@@ -9,16 +9,16 @@ pipeline{
 			}
 			stage('build the app'){
 				steps{
-					bt 'maven clean install -DskipTests'
+					bt 'mvn clean install -DskipTests'
 				}
 			}
 			stage('run the container'){
 				steps{
 					bt 'docker-compose down'
-					bt 'docker-compose up --build'
+					bt 'docker-compose up --build -d'
 				}
 			}
 		}	
 		
-	}
+	
 }
