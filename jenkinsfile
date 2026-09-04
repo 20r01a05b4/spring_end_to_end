@@ -15,8 +15,8 @@ pipeline{
 			stage('run the container'){
 				steps{
 					withCredentials([
-						string(credentialsId:'db_username',variable:'db_username')
-						string(credentialsId:'db_password',variable:'db_password')
+						string(credentialsId:'db_username',variable:'db_username'),
+						string(credentialsId:'db_password',variable:'db_password'),
 						string(credentialsId:'root_password',variable:'root_password')
 					]){
 						
