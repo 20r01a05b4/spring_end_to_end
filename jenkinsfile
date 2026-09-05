@@ -9,21 +9,18 @@ pipeline {
 
     stages {
 
-        // 1. Get source code
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        // 2. Build Spring Boot application
         stage('Build the App') {
             steps {
                 bat 'mvn clean install -DskipTests'
             }
         }
 
-        // 3. Login to Docker Hub
         stage('Docker Login') {
             steps {
                 withCredentials([
@@ -33,7 +30,6 @@ pipeline {
                         passwordVariable: 'DOCKER_PASSWORD'
                     )
                 ]) {
-
                     bat '''
                         docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%
                     '''
@@ -41,7 +37,6 @@ pipeline {
             }
         }
 
-        // 4. Build Docker image
         stage('Build Docker Image') {
             steps {
                 bat '''
@@ -50,7 +45,6 @@ pipeline {
             }
         }
 
-        // 5. Push image to Docker Hub
         stage('Push Docker Image') {
             steps {
                 bat '''
@@ -59,7 +53,6 @@ pipeline {
             }
         }
 
-        // 6. Deploy the SAME image
         stage('Deploy') {
             steps {
 
@@ -78,10 +71,12 @@ pipeline {
                     )
                 ]) {
 
-                    bat 'docker-compose down'
-
                     bat '''
-                        set APP_IMAGE=%DOCKER_IMAGE%:%IMAGE_TAG%
+                        set "APP_IMAGE=%DOCKER_IMAGE%:%IMAGE_TAG%"
+
+                        echo Deploying image: %APP_IMAGE%
+
+                        docker-compose down
 
                         docker-compose up -d
                     '''
