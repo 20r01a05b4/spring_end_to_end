@@ -26,6 +26,10 @@ public class Dockerclass {
 		// s1.setId(2);
 		 s1.setName("ram");
 		 l.add(s1);
+		 Student s2=new Student();
+		// s1.setId(2);
+		 s1.setName("laxman");
+		 l.add(s2);
          r.saveAll(l);	
     }
 }
