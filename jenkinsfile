@@ -1,61 +1,92 @@
-pipeline{
-	agent any
-		stages
-		{
-			stage('checkout'){
-				steps{
-					checkout scm
-				}
-			}
-			stage('build the app'){
-				steps{
-					bat 'mvn clean install -DskipTests'
-				}
-			}
-			stage('Check Jenkins Environment') {
-    steps {
-        withCredentials([
-            string(credentialsId: 'db_username', variable: 'DB_USERNAME'),
-            string(credentialsId: 'password', variable: 'DB_PASSWORD'),
-            string(credentialsId: 'root_password', variable: 'ROOT_PASSWORD')
-        ]) {
-            bat '''
-                echo ===== JENKINS VARIABLES =====
+pipeline {
 
-                echo DB_USERNAME=%DB_USERNAME%
+    agent any
 
-                if defined DB_PASSWORD (
-                    echo DB_PASSWORD=SET
-                ) else (
-                    echo DB_PASSWORD=NOT_SET
-                )
+    stages {
 
-                if defined ROOT_PASSWORD (
-                    echo ROOT_PASSWORD=SET
-                ) else (
-                    echo ROOT_PASSWORD=NOT_SET
-                )
+        // 1. Get code from GitHub
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
-                echo ===== END =====
-            '''
+        // 2. Build Spring Boot application
+        stage('Build the App') {
+            steps {
+                bat 'mvn clean install -DskipTests'
+            }
+        }
+
+        // 3. Login to Docker Hub
+        stage('Docker Login') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'docker_cred',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )
+                ]) {
+                    bat 'docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%'
+                }
+            }
+        }
+
+        // 4. Build Docker image
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t sai1408/springboot-cicd:%BUILD_NUMBER% .'
+            }
+        }
+
+        // 5. Push Docker image to Docker Hub
+        stage('Push Docker Image') {
+            steps {
+                bat 'docker push sai1408/springboot-cicd:%BUILD_NUMBER%'
+            }
+        }
+
+        // 6. Run application locally
+        stage('Run Container') {
+            steps {
+                withCredentials([
+                    string(
+                        credentialsId: 'db_username',
+                        variable: 'DB_USERNAME'
+                    ),
+                    string(
+                        credentialsId: 'password',
+                        variable: 'DB_PASSWORD'
+                    ),
+                    string(
+                        credentialsId: 'root_password',
+                        variable: 'ROOT_PASSWORD'
+                    )
+                ]) {
+
+                    bat 'docker-compose down'
+
+                    bat 'docker-compose up --build -d'
+                }
+            }
         }
     }
-}
-			stage('run the container'){
-				steps{
-					withCredentials([
-						string(credentialsId:'db_username',variable:'DB_USERNAME'),
-						string(credentialsId:'password',variable:'DB_PASSWORD'),
-						string(credentialsId:'root_password',variable:'ROOT_PASSWORD')
-					]){
-						
-					
-					bat 'docker-compose down'
-					bat 'docker-compose up --build -d'
-					}
-				}
-			}
-		}	
-		
-	
+
+    post {
+
+        success {
+            echo '========================================'
+            echo 'CI/CD PIPELINE SUCCESSFUL'
+            echo 'Docker image pushed to Docker Hub'
+            echo '========================================'
+        }
+
+        failure {
+            echo '========================================'
+            echo 'CI/CD PIPELINE FAILED'
+            echo 'Check the stage that failed'
+            echo '========================================'
+        }
+    }
 }
